@@ -1,5 +1,5 @@
 import React from "react";
-import RegistrationRightImage from "../../assets/RegistraionAssets/signUp.png";
+import RegistrationRightImage from "../../assets/RegistraionAssets/registration.gif";
 const RegistrationRight = () => {
   return (
     <>
