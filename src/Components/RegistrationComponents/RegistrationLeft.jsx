@@ -1,23 +1,27 @@
-import React, { useEffect, useState } from "react";
-import { IoEyeOffSharp, IoEyeSharp } from "react-icons/io5";
-import { SucessToast, ErrorToast, InfoToast } from "../../../Utils/Toast.js";
 import {
-  EmailValidator,
-  fullNameValidator,
-  PasswordValidator,
-} from "../../../Utils/Validation.js";
-import {
-  getAuth,
   createUserWithEmailAndPassword,
+  getAuth,
   sendEmailVerification,
-  onAuthStateChanged,
-  updateProfile,
+  updateProfile
 } from "firebase/auth";
+import { getDatabase, push, ref, set } from "firebase/database";
+import React, { useState } from "react";
+import { IoEyeOffSharp, IoEyeSharp } from "react-icons/io5";
+import { Link, useNavigate } from "react-router-dom";
 
 import BeatLoader from "react-spinners/BeatLoader.js";
+import { GetTimeNow } from "../../../Utils/Moment/Moment.js";
+import { ErrorToast, SucessToast } from "../../../Utils/Toast.js";
+import {
+  EmailValidator,
+  PasswordValidator,
+  fullNameValidator,
+} from "../../../Utils/Validation.js";
 
 const RegistrationLeft = () => {
   const auth = getAuth();
+  const db = getDatabase();
+  const navigate = useNavigate()
   const [email, setEmail] = useState("");
   const [fullname, setfullname] = useState("");
   const [password, setpassword] = useState("");
@@ -94,10 +98,25 @@ const RegistrationLeft = () => {
           updateProfile(auth.currentUser, {
             displayName: fullname,
           });
+        }).then(()=> {
+          const usersRef = ref(db, "users/") 
+          set(push(usersRef)  , {
+            uid:auth.currentUser.uid,
+            userName: fullname,
+            userEmail: auth.currentUser.email,
+            createdAt:GetTimeNow()
+          }).then(()=> {
+            console.log("Write data on users collection");
+            navigate("/login")
+          }).catch((err)=> {
+            console.error("User Database Write failed" ,err)
+          })
         })
         .catch((err) => {
-          let ourError = err.message.split("/")[1];
-          ErrorToast(ourError.slice(0, ourError.length - 2), "top-left");
+          
+          // let ourError = err.message.split("/")[1];
+          // ErrorToast(ourError.slice(0, ourError.length - 2), "top-left");
+          ErrorToast("err.code", "top-left");
         })
         .finally(() => {
           setpasswordError("");
@@ -110,6 +129,9 @@ const RegistrationLeft = () => {
         });
     }
   };
+
+
+  
 
   return (
     <>
@@ -211,7 +233,10 @@ const RegistrationLeft = () => {
               <div className="flex justify-center">
                 <p>
                   Already have an account ?{" "}
+                  <Link to ={"/login"}>
                   <span className="text-[#EA6C00]">Sign In</span>
+                  </Link>
+                  
                 </p>
               </div>
             </div>
