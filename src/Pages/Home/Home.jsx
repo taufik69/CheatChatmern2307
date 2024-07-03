@@ -5,7 +5,7 @@ import HomeRight from "../../Components/HomeComponents/HomeRight/HomeRight";
 const Home = () => {
   return (
     <>
-      <div className="bg-blue-100 h-screen p-9 flex items-center justify-between">
+      <div className="bg-blue-100 h-screen p-5 flex gap-x-10 ">
         <HomeLeft />
         <HomeRight />
       </div>
