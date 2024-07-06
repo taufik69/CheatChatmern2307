@@ -1,12 +1,12 @@
 import React from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import GroupImg from "../../../../assets/HomeAssets/HomeRightAssets/GroupListAssets/g2.gif";
-const GroupList = () => {
+const MyGroup = () => {
   return (
     <div className="px-3 shadow-xl py-2  w-[32%] h-[400px] mt-5 rounded-xl ">
       <div className="flex items-center justify-between">
         <span className="font-custom_poppins font-semibold text-xl text-black">
-          Groups List
+          My Groups
         </span>
         <span className="text-2xl text-primaryBlue">
           <BsThreeDotsVertical />
@@ -36,9 +36,9 @@ const GroupList = () => {
             </div>
 
             <div>
-              <button className="px-5 py-2 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-xl mr-3 text-white font-custom_poppins">
-                Join
-              </button>
+              <span className="font-custom_poppins text-textPrimaryColor opacity-50 text-sm">
+                Today, 8:56pm
+              </span>
             </div>
           </div>
         ))}
@@ -47,4 +47,4 @@ const GroupList = () => {
   );
 };
 
-export default GroupList;
+export default MyGroup;

@@ -1,12 +1,12 @@
 import React from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import GroupImg from "../../../../assets/HomeAssets/HomeRightAssets/GroupListAssets/g2.gif";
-const GroupList = () => {
+import GroupImg from "../../../../assets/HomeAssets/HomeRightAssets/GroupListAssets/g3.gif";
+const BlockUser = () => {
   return (
     <div className="px-3 shadow-xl py-2  w-[32%] h-[400px] mt-5 rounded-xl ">
       <div className="flex items-center justify-between">
         <span className="font-custom_poppins font-semibold text-xl text-black">
-          Groups List
+          Blocked Users
         </span>
         <span className="text-2xl text-primaryBlue">
           <BsThreeDotsVertical />
@@ -37,7 +37,7 @@ const GroupList = () => {
 
             <div>
               <button className="px-5 py-2 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-xl mr-3 text-white font-custom_poppins">
-                Join
+                Accept
               </button>
             </div>
           </div>
@@ -47,4 +47,4 @@ const GroupList = () => {
   );
 };
 
-export default GroupList;
+export default BlockUser;

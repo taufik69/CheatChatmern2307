@@ -1,15 +1,11 @@
 import React from "react";
-import HomeLeft from "../../Components/HomeComponents/HomeLeft/HomeLeft";
-import HomeRight from "../../Components/HomeComponents/HomeRight/HomeRight";
+import HomeRightContent from "../../Components/HomeComponents/HomeRightComponent/HomeRightContent";
 
 const Home = () => {
   return (
-    <>
-      <div className="bg-blue-100 h-screen p-5 flex gap-x-10 ">
-        <HomeLeft />
-        <HomeRight />
-      </div>
-    </>
+    <div>
+      <HomeRightContent />
+    </div>
   );
 };
 
