@@ -9,16 +9,19 @@ import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { IoEyeOffSharp, IoEyeSharp } from "react-icons/io5";
 import { DNA } from "react-loader-spinner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ErrorToast, SucessToast } from "../../../Utils/Toast.js";
 
 import {
   EmailValidator,
   PasswordValidator,
 } from "../../../Utils/Validation.js";
+import { GetTimeNow } from "../../../Utils/Moment/Moment.js";
+import { getDatabase, push, ref, set } from "firebase/database";
 const LoginLeft = () => {
   const auth = getAuth();
-
+  const db = getDatabase();
+  const navigate = useNavigate();
   const [eyeopen, seteyeopen] = useState(false);
   const [loading, setloading] = useState(false);
   const [loginInfo, setloginInfo] = useState({
@@ -64,6 +67,7 @@ const LoginLeft = () => {
       signInWithEmailAndPassword(auth, email, password)
         .then((userInfo) => {
           SucessToast(`login Sucessfull`, "bottom-left");
+          navigate("/");
         })
         .catch((err) => {
           ErrorToast(`${err.code}`, "bottom-right");
@@ -91,7 +95,22 @@ const LoginLeft = () => {
         const credential = GoogleAuthProvider.credentialFromResult(result);
         const token = credential.accessToken;
         const user = result.user;
-        console.log(user);
+        return user;
+      })
+      .then((userCredintial) => {
+        const { photoUrl, displayName, email, localId } =
+          userCredintial.reloadUserInfo;
+        const usersRef = ref(db, "users/");
+        set(push(usersRef), {
+          uid: localId,
+          userName: displayName,
+          usersProfile_picture: photoUrl,
+          userEmail: email,
+          createdAt: GetTimeNow(),
+        });
+      })
+      .then(() => {
+        navigate("/");
       })
       .catch((error) => {
         // Handle Errors here.
@@ -130,6 +149,7 @@ const LoginLeft = () => {
                     type="email"
                     name="email"
                     id="email"
+                    value={loginInfo.email}
                     onChange={handleLoginInput}
                     className="py-3 rounded-md pl-2 placeholder:font-Custom_nunito"
                     placeholder="Ladushing691@gmail.com"
@@ -152,6 +172,7 @@ const LoginLeft = () => {
                       name="password"
                       id="password"
                       onChange={handleLoginInput}
+                      value={loginInfo.password}
                       className=" py-3 rounded-md pl-2 placeholder:font-Custom_nunito"
                       placeholder="...."
                     />

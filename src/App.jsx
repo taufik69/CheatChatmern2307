@@ -12,6 +12,7 @@ import Login from "./Pages/Login/Login.jsx";
 import RootLayout from "./Components/HomeComponents/RootLayout/RootLayout.jsx";
 
 import Home from "./Pages/Home/Home.jsx";
+import Error from "./Components/Error/Error.jsx";
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -23,6 +24,7 @@ const App = () => {
           <Route path="/chat" element={"Caht"}></Route>
           <Route path="/notification" element={"Notification"}></Route>
           <Route path="/settings" element={"settings"}></Route>
+          <Route path="*" element={<Error />}></Route>
         </Route>
       </>
     )
