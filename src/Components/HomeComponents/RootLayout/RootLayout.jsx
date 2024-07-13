@@ -8,7 +8,6 @@ const RootLayout = () => {
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       setisEmailVerified(user.reloadUserInfo.emailVerified);
-      console.log(user.reloadUserInfo.emailVerified);
     });
   }, [auth]);
   return (

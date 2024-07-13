@@ -6,18 +6,60 @@ import bell from "../../../../src/assets/HomeAssets/HomeLeftAssets/bell.gif";
 import Settings from "../../../../src/assets/HomeAssets/HomeLeftAssets/settings.png";
 import logout from "../../../../src/assets/HomeAssets/HomeLeftAssets/logout.png";
 import { NavLink, useLocation } from "react-router-dom";
+import { IoCloudUploadOutline } from "react-icons/io5";
+import { Uploader } from "uploader"; // Installed by "react-uploader".
+import { UploadButton } from "react-uploader";
 
 const HomeLeft = () => {
   const location = useLocation();
   const path = location.pathname.split("/")[1];
 
+  const uploader = Uploader({
+    apiKey: "free",
+  });
+  const options = {
+    multi: true,
+    editor: {
+      images: {
+        allowResizeOnMove: true,
+        preview: true,
+        crop: true,
+        cropRatio: 4 / 3,
+        cropShape: "circ",
+      },
+    },
+  };
+  /**
+   * todo : HandleUpload funtion
+   * @param ({})
+   */
+
   return (
     <>
-      <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-400 w-[186px] rounded-2xl flex flex-col items-center justify-start ">
-        <div>
+      <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-400 max-w-[186px] rounded-2xl flex flex-col items-center justify-start ">
+        <div className="relative shadowProfile">
           <picture>
-            <img src={Avatar} alt={Avatar} />
+            <img
+              src={Avatar}
+              alt={Avatar}
+              className=" h-full w-full object-cover rounded-full "
+            />
           </picture>
+          <div className="absolute top-[50%] left-[42%] cursor-pointer z-10 icons">
+            <span>
+              <UploadButton
+                uploader={uploader}
+                options={options}
+                onComplete={(files) => console.log(files)}
+              >
+                {({ onClick }) => (
+                  <button onClick={onClick}>
+                    <IoCloudUploadOutline className="text-4xl  text-white" />
+                  </button>
+                )}
+              </UploadButton>
+            </span>
+          </div>
         </div>
 
         <div className="flex flex-col justify-center items-center gap-y-12">

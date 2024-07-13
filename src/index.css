@@ -63,4 +63,23 @@
     height: 100%;
     background: #fff;
   }
+
+  .shadowProfile {
+    position: relative;
+  }
+  .shadowProfile::after {
+    position: absolute;
+    content: "";
+    top: 37px;
+    left: 37px;
+    width: 112px;
+    height: 111px;
+    background: #000;
+    opacity: 0;
+    border-radius: 50%;
+  }
+  .shadowProfile:hover::after {
+    background: #000;
+    opacity: 0.4;
+  }
 }
