@@ -3,8 +3,10 @@ import GroupImg from "../../../../assets/HomeAssets/HomeRightAssets/GroupListAss
 import { getDatabase, ref, onValue } from "firebase/database";
 import { useEffect, useState } from "react";
 import moment from "moment";
+import { getAuth } from "firebase/auth";
 const UserList = () => {
   const db = getDatabase();
+  const auth = getAuth();
   const [users, setusers] = useState([]);
   /**
    * todo : Fetch all data from database
@@ -16,15 +18,17 @@ const UserList = () => {
     onValue(userDbRef, (snapshot) => {
       let userBlankArr = [];
       snapshot.forEach((item) => {
-        userBlankArr.push({
-          ...item.val(),
-          userKey: item.key,
-        });
+        if (auth.currentUser.uid !== item.val().uid) {
+          userBlankArr.push({
+            ...item.val(),
+            userKey: item.key,
+          });
+        }
       });
       setusers(userBlankArr);
     });
   }, []);
-  console.log(users);
+
   return (
     <div className="px-3 shadow-xl py-2  w-[32%] h-[400px] mt-5 rounded-xl ">
       <div className="flex items-center justify-between">

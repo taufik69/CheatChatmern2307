@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Avatar from "../../../../src/assets/HomeAssets/HomeLeftAssets/avatar.gif";
 import home from "../../../../src/assets/HomeAssets/HomeLeftAssets/home.gif";
 import chat from "../../../../src/assets/HomeAssets/HomeLeftAssets/chat.gif";
@@ -9,10 +9,16 @@ import { NavLink, useLocation } from "react-router-dom";
 import { IoCloudUploadOutline } from "react-icons/io5";
 import { Uploader } from "uploader"; // Installed by "react-uploader".
 import { UploadButton } from "react-uploader";
+import { getDatabase, ref, set, onValue, update } from "firebase/database";
+import { getAuth } from "firebase/auth";
+import { ErrorToast, SucessToast } from "../../../../Utils/Toast";
 
 const HomeLeft = () => {
   const location = useLocation();
+  const [userList, setuserList] = useState({});
   const path = location.pathname.split("/")[1];
+  const db = getDatabase();
+  const auth = getAuth();
 
   const uploader = Uploader({
     apiKey: "free",
@@ -30,27 +36,60 @@ const HomeLeft = () => {
     },
   };
   /**
-   * todo : HandleUpload funtion
+   * todo : get all users funtion
    * @param ({})
    */
+  useEffect(() => {
+    const userId = auth.currentUser.uid;
+    const starCountRef = ref(db, "users/");
+    onValue(starCountRef, (snapshot) => {
+      snapshot.forEach((item) => {
+        if (userId === item.val().uid) {
+          setuserList({
+            ...item.val(),
+            userKey: item.key,
+          });
+        }
+      });
+    });
+  }, []);
+  console.log();
+
+  // const dbref for profile update
+  const profileUpdateRef = ref(db, `users/${userList.userKey}`);
 
   return (
     <>
-      <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-400 max-w-[186px] rounded-2xl flex flex-col items-center justify-start ">
+      <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-400 w-[224px] rounded-2xl flex flex-col items-center justify-start ">
         <div className="relative shadowProfile">
           <picture>
             <img
-              src={Avatar}
+              src={
+                userList.usersProfile_picture
+                  ? userList.usersProfile_picture
+                  : Avatar
+              }
               alt={Avatar}
-              className=" h-full w-full object-cover rounded-full "
+              className=" object-cover rounded-full w-[100px] h-[100px] my-12  "
             />
           </picture>
-          <div className="absolute top-[50%] left-[42%] cursor-pointer z-10 icons">
+
+          <div className="absolute top-[50%] left-[32%] cursor-pointer z-10 icons">
             <span>
               <UploadButton
                 uploader={uploader}
                 options={options}
-                onComplete={(files) => console.log(files)}
+                onComplete={(files) =>
+                  update(profileUpdateRef, {
+                    usersProfile_picture: files[0].fileUrl,
+                  })
+                    .then(() =>
+                      SucessToast("Profile Update done", "top-center")
+                    )
+                    .catch((err) => {
+                      ErrorToast(`${err.code}`);
+                    })
+                }
               >
                 {({ onClick }) => (
                   <button onClick={onClick}>
@@ -62,6 +101,9 @@ const HomeLeft = () => {
           </div>
         </div>
 
+        <h1 className="mb-10 text-white font-semibold font-custom_poppins  text-[25px] uppercase">
+          {auth.currentUser.displayName}
+        </h1>
         <div className="flex flex-col justify-center items-center gap-y-12">
           <NavLink to="/">
             <div

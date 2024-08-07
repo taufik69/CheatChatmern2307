@@ -98,6 +98,8 @@ const LoginLeft = () => {
         return user;
       })
       .then((userCredintial) => {
+        
+
         const { photoUrl, displayName, email, localId } =
           userCredintial.reloadUserInfo;
         const usersRef = ref(db, "users/");
@@ -115,7 +117,7 @@ const LoginLeft = () => {
       .catch((error) => {
         // Handle Errors here.
         const errorCode = error.code;
-        console.log(errorCode);
+      
       });
   };
 
