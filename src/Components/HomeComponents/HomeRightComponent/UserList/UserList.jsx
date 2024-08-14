@@ -1,13 +1,15 @@
 import { BsThreeDotsVertical } from "react-icons/bs";
 import GroupImg from "../../../../assets/HomeAssets/HomeRightAssets/GroupListAssets/g1.gif";
-import { getDatabase, ref, onValue } from "firebase/database";
+import { getDatabase, ref, onValue, set, push } from "firebase/database";
 import { useEffect, useState } from "react";
 import moment from "moment";
 import { getAuth } from "firebase/auth";
+import { GetTimeNow } from "../../../../../Utils/Moment/Moment";
 const UserList = () => {
   const db = getDatabase();
   const auth = getAuth();
   const [users, setusers] = useState([]);
+  const [isFriendRequest, setisFriendRequest] = useState([]);
   /**
    * todo : Fetch all data from database
    * *DBNAME : "users"
@@ -28,6 +30,51 @@ const UserList = () => {
       setusers(userBlankArr);
     });
   }, []);
+
+  /**
+   * todo : handleFriendRequest function implement
+   * @param({user})
+   *
+   */
+
+  const handleFriendRequest = (user) => {
+    const FriendRequestRef = ref(db, "FriendRequest/");
+    set(push(FriendRequestRef), {
+      whoSendFriendRequestName: auth.currentUser.displayName,
+      whoSendFriendRequestEmail: auth.currentUser.email,
+      whoSendFriendRequestUid: auth.currentUser.uid,
+      whoSendFriendRequestProfilePicture: auth.currentUser.photoURL
+        ? auth.currentUser.photoURL
+        : null,
+      whoRecivedFriendRequestUid: user.uid,
+      whoRecivedFriendRequestName: user.userName,
+      whoRecivedFriendRequestEmail: user.userEmail,
+      whoRecivedFriendRequestUserKey: user.userKey,
+      whoRecivedFriendRequestProfile_picture: user.usersProfile_picture,
+      createdAt: GetTimeNow(),
+    });
+  };
+
+  /**
+   * todo : Fetch data from friendRequest databasd
+   * @param({})
+   * *hooks useEffect()
+   */
+
+  useEffect(() => {
+    const friendRequestDbRef = ref(db, "FriendRequest/");
+    onValue(friendRequestDbRef, (snapshot) => {
+      let blackFriendRequestList = [];
+      snapshot.forEach((item) => {
+        blackFriendRequestList.push(
+          item.val().whoRecivedFriendRequestUid +
+            item.val().whoSendFriendRequestUid
+        );
+      });
+      setisFriendRequest(blackFriendRequestList);
+    });
+  }, []);
+  console.log(isFriendRequest);
 
   return (
     <div className="px-3 shadow-xl py-2  w-[32%] h-[400px] mt-5 rounded-xl ">
@@ -67,9 +114,21 @@ const UserList = () => {
             </div>
 
             <div>
-              <button className="px-5 py-2 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-xl mr-3 text-white font-custom_poppins">
-                +
-              </button>
+              {isFriendRequest.includes(
+                user.uid + auth.currentUser.uid ||
+                  auth.currentUser.uid + user.uid
+              ) ? (
+                <button className="px-5 py-2 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-xl mr-3 text-white font-custom_poppins">
+                  -
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleFriendRequest(user)}
+                  className="px-5 py-2 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-xl mr-3 text-white font-custom_poppins"
+                >
+                  +
+                </button>
+              )}
             </div>
           </div>
         ))}
