@@ -74,14 +74,20 @@ const UserList = () => {
       setisFriendRequest(blackFriendRequestList);
     });
   }, []);
-  console.log(isFriendRequest);
 
   return (
     <div className="px-3 shadow-xl py-2  w-[32%] h-[400px] mt-5 rounded-xl ">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between relative">
         <span className="font-custom_poppins font-semibold text-xl text-black">
           User List
+          <span class="absolute flex h-10 w-10 -top-3 left-[16%]">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+            <span class="relative flex justify-center items-center text-white rounded-full h-10 w-10 bg-sky-500 ">
+              {users?.length}
+            </span>
+          </span>
         </span>
+
         <span className="text-2xl text-primaryBlue">
           <BsThreeDotsVertical />
         </span>
