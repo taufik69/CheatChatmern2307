@@ -11,7 +11,8 @@ import {
   push,
   remove,
 } from "firebase/database";
-import moment from "moment/moment";
+import moment from "moment";
+
 const Friends = () => {
   const db = getDatabase();
   const auth = getAuth();

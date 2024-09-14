@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import GroupImg from "../../../../assets/HomeAssets/HomeRightAssets/GroupListAssets/g3.gif";
 import { getAuth } from "firebase/auth";
+import { GetTimeNow } from "../../../../../Utils/Moment/Moment";
 import {
   getDatabase,
   ref,
@@ -37,6 +38,32 @@ const BlockUser = () => {
   }, []);
 
   console.log(BlockUserList);
+
+  /**
+   * todo : handleUnblock function implement
+   * @param {} item
+   */
+  const handleUnblock = (item = {}) => {
+    const unblockObj = {
+      FriendRequestKey: item.FriendRequestKey,
+      createdAt: GetTimeNow(),
+      whoRecivedFriendRequestEmail: item.blockbyEmail,
+      whoRecivedFriendRequestName: item.blockbyName,
+      whoRecivedFriendRequestProfile_picture: item.blockbyProfile_picture,
+      whoRecivedFriendRequestUid: item.blockbyUid,
+      whoSendFriendRequestEmail: item.blockedEmail,
+      whoSendFriendRequestName: item.blockedName,
+      whoSendFriendRequestEmail: item.blockedEmail,
+      whoSendFriendRequestUid: item.blockedUid,
+      whoSendFriendRequestProfilePicture: item.blockedProfile_picture
+        ? item.blockedProfile_picture
+        : "",
+    };
+    const FreindsRef = ref(db, "Friends/");
+    set(push(FreindsRef), unblockObj).then(() => {
+      remove(ref(db, "blockedUser/" + item.BlockKey));
+    });
+  };
   return (
     <div className="px-3 shadow-xl py-2  w-[32%] h-[400px] mt-5 rounded-xl ">
       <div className="flex items-center justify-between relative">
@@ -85,7 +112,10 @@ const BlockUser = () => {
             </div>
 
             <div>
-              <button className="px-5 py-2 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-xl mr-3 text-white font-custom_poppins">
+              <button
+                className="px-5 py-2 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-xl mr-3 text-white font-custom_poppins"
+                onClick={() => handleUnblock(item)}
+              >
                 UnBlocked
               </button>
             </div>
