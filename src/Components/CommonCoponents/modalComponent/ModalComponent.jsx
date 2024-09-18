@@ -27,7 +27,7 @@ const ModalComponent = ({ openModal, closeModal, modalIsOpen, children }) => {
         >
           x
         </button>
-        {children}
+        <div>{children}</div>
       </Modal>
     </div>
   );

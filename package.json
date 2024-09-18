@@ -22,7 +22,8 @@
     "react-spinners": "^0.13.8",
     "react-toastify": "^10.0.5",
     "react-uploader": "^3.43.0",
-    "tailwind-scrollbar": "^3.1.0"
+    "tailwind-scrollbar": "^3.1.0",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

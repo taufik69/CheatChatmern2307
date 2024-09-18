@@ -37,8 +37,6 @@ const BlockUser = () => {
     });
   }, []);
 
-  console.log(BlockUserList);
-
   /**
    * todo : handleUnblock function implement
    * @param {} item

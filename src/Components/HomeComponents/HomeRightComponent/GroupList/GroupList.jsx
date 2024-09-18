@@ -1,14 +1,32 @@
 import React, { useState, createRef } from "react";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
+import { v4 as uuidv4 } from "uuid";
 const defaultSrc =
   "https://raw.githubusercontent.com/roadmanfong/react-cropper/master/example/img/child.jpg";
 import GroupImg from "../../../../assets/HomeAssets/HomeRightAssets/GroupListAssets/g2.gif";
 import ModalComponent from "../../../CommonCoponents/modalComponent/ModalComponent";
+import { ErrorToast, SucessToast } from "../../../../../Utils/Toast.js";
+import { getDatabase, push, ref, set } from "firebase/database";
+import { getAuth } from "firebase/auth";
+import {
+  getStorage,
+  ref as ourStroageRef,
+  uploadString,
+  getDownloadURL,
+} from "firebase/storage";
 const GroupList = () => {
+  const storage = getStorage();
+  const db = getDatabase();
+  const auth = getAuth();
   const [modalIsOpen, setIsOpen] = React.useState(false);
   const [image, setImage] = useState(defaultSrc);
-  const [cropData, setCropData] = useState("#");
+  const [cropData, setCropData] = useState("");
+  const [loading, setloading] = useState(false);
+  const [groupInfo, setgroupInfo] = useState({
+    groupTagName: "",
+    groupName: "",
+  });
   const cropperRef = createRef();
   function openModal() {
     setIsOpen(true);
@@ -17,7 +35,7 @@ const GroupList = () => {
   function closeModal() {
     setIsOpen(false);
   }
-
+  //image onchange handeler
   const onChange = (e) => {
     e.preventDefault();
     let files;
@@ -38,6 +56,69 @@ const GroupList = () => {
       setCropData(cropperRef.current?.cropper.getCroppedCanvas().toDataURL());
     }
   };
+
+  // onchange for inputValue
+  const handleGroupInput = (event) => {
+    const { id, value } = event.target;
+
+    setgroupInfo({
+      ...groupInfo,
+      [id]: value,
+    });
+  };
+
+  // handleCreateGroup funtion
+  const handleCreateGroup = () => {
+    const { groupName, groupTagName } = groupInfo;
+    if (!groupName) {
+      ErrorToast("Groupname missing !!", "top-right");
+    } else if (!groupTagName) {
+      ErrorToast("GroupTagname missing !!", "top-right");
+    } else if (!cropData) {
+      ErrorToast("Crop image  missing !!", "top-right");
+    } else {
+      setloading(true);
+      const storageRef = ourStroageRef(
+        storage,
+        `groupImage${uuidv4().split("-")[0]}`
+      );
+      uploadString(storageRef, cropData, "data_url")
+        .then((snapshot) => {
+          const { metadata } = snapshot;
+          return metadata?.fullPath;
+        })
+        .then((iamgePath) => {
+          return getDownloadURL(ourStroageRef(storage, iamgePath));
+        })
+        .then((downloadUrl) => {
+          set(push(ref(db, "group/")), {
+            groupName,
+            groupTagName,
+            groupImage: downloadUrl,
+            whoCreateGroupUId: auth.currentUser.uid,
+            whoCreateGroupName: auth.currentUser.displayName
+              ? auth.currentUser.displayName
+              : "MERN 2307",
+            whoCreateGroupemail: auth.currentUser.email,
+            whoCreateGroupProfile_picture: auth.currentUser.photoURL
+              ? auth.currentUser.photoURL
+              : "",
+          });
+        })
+        .catch((err) => {
+          ErrorToast(`Error from ${err.code}`, "top-left");
+        })
+        .finally(() => {
+          setgroupInfo({
+            groupTagName: "",
+            groupName: "",
+          });
+          setloading(false);
+          closeModal();
+        });
+    }
+  };
+
   return (
     <div className="px-3 shadow-xl py-2  w-[32%] h-[400px] mt-5 rounded-xl ">
       <div className="flex items-center justify-between">
@@ -88,7 +169,7 @@ const GroupList = () => {
         closeModal={closeModal}
         modalIsOpen={modalIsOpen}
       >
-        <div className="w-[80vw] mt-10 overflow-y-scroll">
+        <div className="w-[80vw] h-[80vh] mt-10 overflow-y-scroll">
           <form action="#" method="post" onSubmit={(e) => e.preventDefault()}>
             <div className="flex flex-col items-start gap-y-2">
               <label
@@ -103,7 +184,8 @@ const GroupList = () => {
                 type="text"
                 id="groupName"
                 name="groupName"
-                value={""}
+                value={groupInfo.groupName}
+                onChange={handleGroupInput}
                 placeholder="Enter Your group Name"
               />
             </div>
@@ -121,7 +203,8 @@ const GroupList = () => {
                 type="text"
                 id="groupTagName"
                 name="groupTagName"
-                value={""}
+                value={groupInfo.groupTagName}
+                onChange={handleGroupInput}
                 placeholder="Enter Your group TagName"
               />
             </div>
@@ -171,6 +254,20 @@ const GroupList = () => {
               </div>
             </div>
             {/* == cropper jsx */}
+            <div className="my-10">
+              {loading ? (
+                <button className="w-full py-5 bg-blue-300 font-bold font-Custom_nunito text-white">
+                  loading ...
+                </button>
+              ) : (
+                <button
+                  className="w-full py-5 bg-blue-300 font-bold font-Custom_nunito text-white"
+                  onClick={handleCreateGroup}
+                >
+                  Create Group
+                </button>
+              )}
+            </div>
           </form>
         </div>
       </ModalComponent>
