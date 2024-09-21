@@ -1,13 +1,14 @@
-import React, { useState, createRef } from "react";
+import React, { useState, createRef, useEffect } from "react";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
+import { GetTimeNow } from "../../../../../Utils/Moment/Moment.js";
 import { v4 as uuidv4 } from "uuid";
 const defaultSrc =
   "https://raw.githubusercontent.com/roadmanfong/react-cropper/master/example/img/child.jpg";
 import GroupImg from "../../../../assets/HomeAssets/HomeRightAssets/GroupListAssets/g2.gif";
 import ModalComponent from "../../../CommonCoponents/modalComponent/ModalComponent";
 import { ErrorToast, SucessToast } from "../../../../../Utils/Toast.js";
-import { getDatabase, push, ref, set } from "firebase/database";
+import { getDatabase, push, ref, set, onValue } from "firebase/database";
 import { getAuth } from "firebase/auth";
 import {
   getStorage,
@@ -15,6 +16,7 @@ import {
   uploadString,
   getDownloadURL,
 } from "firebase/storage";
+
 const GroupList = () => {
   const storage = getStorage();
   const db = getDatabase();
@@ -23,6 +25,8 @@ const GroupList = () => {
   const [image, setImage] = useState(defaultSrc);
   const [cropData, setCropData] = useState("");
   const [loading, setloading] = useState(false);
+  const [allgroup, setallgroup] = useState([]);
+  const [allgroupRequest, setallgroupRequest] = useState([]);
   const [groupInfo, setgroupInfo] = useState({
     groupTagName: "",
     groupName: "",
@@ -119,6 +123,55 @@ const GroupList = () => {
     }
   };
 
+  // fetch all group data
+  useEffect(() => {
+    const groupInfoFetcher = () => {
+      const starCountRef = ref(db, "group/");
+      onValue(starCountRef, (snapshot) => {
+        let groupBlankArr = [];
+        snapshot.forEach((item) => {
+          if (auth.currentUser.uid !== item.val().whoCreateGroupUId) {
+            groupBlankArr.push({ ...item.val(), groupKey: item.key });
+          }
+        });
+        setallgroup(groupBlankArr);
+      });
+    };
+
+    const getAllGroupRequest = () => {
+      const starCountRef = ref(db, "groupJoinRequest/");
+      onValue(starCountRef, (snapshot) => {
+        let groupJoinRequestArr = [];
+        snapshot.forEach((item) => {
+          groupJoinRequestArr.push(item.val().groupKey);
+        });
+        setallgroupRequest(groupJoinRequestArr);
+      });
+    };
+    groupInfoFetcher();
+    getAllGroupRequest();
+  }, []);
+
+  /**
+   * todo : handleJoin funtion implement
+   * @param({item:{}})
+   */
+
+  const handleJoin = (item = {}) => {
+    set(push(ref(db, "groupJoinRequest/")), {
+      ...item,
+      whoWanttoJoinGroupUid: auth.currentUser.uid,
+      whoWanttoJoinGroupName: auth.currentUser.displayName,
+      whoWanttoJoinGroupEmail: auth.currentUser.email,
+      whoWanttoJoinGroupProfile_picture: auth.currentUser.photoURL
+        ? auth.currentUser.photoURL
+        : "",
+      createdAt: GetTimeNow(),
+    });
+  };
+
+
+
   return (
     <div className="px-3 shadow-xl py-2  w-[32%] h-[400px] mt-5 rounded-xl ">
       <div className="flex items-center justify-between">
@@ -135,13 +188,16 @@ const GroupList = () => {
       </div>
 
       <div className="flex flex-col gap-y-5  h-[85%] mt-3 overflow-y-scroll scrollbar-thin scrollbar-thumb-sky-700 scrollbar-track-transparent">
-        {[...new Array(10)].map((_, index) => (
-          <div className="flex items-center justify-between border-b-[1px] border-b-gray-300 pb-3">
+        {allgroup?.map((item) => (
+          <div
+            className="flex items-center justify-between border-b-[1px] border-b-gray-300 pb-3"
+            key={item.groupKey}
+          >
             <div className="w-[70px] h-[70px] rounded-full shadow-lg">
               <picture>
                 <img
-                  src={GroupImg}
-                  alt={GroupImg}
+                  src={item ? item.groupImage : GroupImg}
+                  alt={item ? item.groupImage : GroupImg}
                   className="w-full h-full rounded-full  object-contain"
                 />
               </picture>
@@ -149,17 +205,23 @@ const GroupList = () => {
 
             <div className="flex flex-col items-center justify-center text-wrap w-[50%]  text-justify">
               <h3 className=" text-lg font-semibold font-custom_poppins text-textPrimaryColor">
-                Friends Reunion
+                {item ? item.groupName : "mern 2307"}
               </h3>
               <p className="opacity-55 text-md font-noraml font-custom_poppins text-textPrimaryColor">
-                Hi Guys, Wassup!
+                {item ? item.groupTagName : "Hello"}
               </p>
             </div>
 
-            <div>
-              <button className="px-5 py-2 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-xl mr-3 text-white font-custom_poppins">
-                Join
-              </button>
+            <div onClick={() => handleJoin(item)}>
+              {allgroupRequest?.includes(item.groupKey) ? (
+                <button className="px-5 py-2 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-xl mr-3 text-white font-custom_poppins">
+                  pending GR
+                </button>
+              ) : (
+                <button className="px-5 py-2 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-xl mr-3 text-white font-custom_poppins">
+                  Join
+                </button>
+              )}
             </div>
           </div>
         ))}
