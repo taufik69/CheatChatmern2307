@@ -17,7 +17,7 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 
-const GroupList = () => {
+const GroupList = ({ isChatC = false }) => {
   const storage = getStorage();
   const db = getDatabase();
   const auth = getAuth();
@@ -170,10 +170,14 @@ const GroupList = () => {
     });
   };
 
-
-
   return (
-    <div className="px-3 shadow-xl py-2  w-[32%] h-[400px] mt-5 rounded-xl ">
+    <div
+      className={
+        isChatC
+          ? "px-3 shadow-xl py-2  w-full h-[400px] mt-5 rounded-xl "
+          : "px-3 shadow-xl py-2  w-[32%] h-[400px] mt-5 rounded-xl "
+      }
+    >
       <div className="flex items-center justify-between">
         <span className="font-custom_poppins font-semibold text-xl text-black">
           Groups List
