@@ -13,6 +13,7 @@ import RootLayout from "./Components/HomeComponents/RootLayout/RootLayout.jsx";
 import Home from "./Pages/Home/Home.jsx";
 import Chat from "./Pages/Chat/Chat.jsx";
 import Error from "./Components/Error/Error.jsx";
+import Notification from "./Pages/Notification/Notification.jsx";
 const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
@@ -22,7 +23,7 @@ const App = () => {
         <Route element={<RootLayout />}>
           <Route index path="/" element={<Home />}></Route>
           <Route path="/chat" element={<Chat />}></Route>
-          <Route path="/notification" element={"Notification"}></Route>
+          <Route path="/notification" element={<Notification />}></Route>
           <Route path="/settings" element={"settings"}></Route>
           <Route path="*" element={<Error />}></Route>
         </Route>

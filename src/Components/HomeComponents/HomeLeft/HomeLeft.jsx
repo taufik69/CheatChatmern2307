@@ -11,6 +11,7 @@ import { Uploader } from "uploader"; // Installed by "react-uploader".
 import { UploadButton } from "react-uploader";
 import { getDatabase, ref, set, onValue, update } from "firebase/database";
 import { getAuth } from "firebase/auth";
+import { useSelector } from "react-redux";
 import { ErrorToast, SucessToast } from "../../../../Utils/Toast";
 
 const HomeLeft = () => {
@@ -53,11 +54,10 @@ const HomeLeft = () => {
       });
     });
   }, []);
-  console.log();
 
   // const dbref for profile update
   const profileUpdateRef = ref(db, `users/${userList.userKey}`);
-
+  const { mern2306 } = useSelector((state) => state);
   return (
     <>
       <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-400 w-[224px] rounded-2xl flex flex-col items-center justify-start ">
@@ -102,7 +102,7 @@ const HomeLeft = () => {
         </div>
 
         <h1 className="mb-10 text-white font-semibold font-custom_poppins  text-[25px] uppercase">
-          {auth.currentUser.displayName}
+          {auth.currentUser.displayName} {mern2306.value}
         </h1>
         <div className="flex flex-col justify-center items-center gap-y-12">
           <NavLink to="/">
