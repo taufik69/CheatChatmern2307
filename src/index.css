@@ -115,7 +115,9 @@
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
     z-index: -1;
   }
-
+  .cameraModal {
+    z-index: 1;
+  }
   .box_Right::after {
     @apply bg-blue-500;
     position: absolute;

@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
-import counterReducer from "../AllSlice/slice.js";
+import friendsReducer from "../AllSlice/Friendslice.js";
 export const store = configureStore({
   reducer: {
-    mern2306: counterReducer,
+    friendStore: friendsReducer,
   },
 });

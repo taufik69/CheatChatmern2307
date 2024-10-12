@@ -57,7 +57,7 @@ const HomeLeft = () => {
 
   // const dbref for profile update
   const profileUpdateRef = ref(db, `users/${userList.userKey}`);
-  const { mern2306 } = useSelector((state) => state);
+
   return (
     <>
       <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-400 w-[224px] rounded-2xl flex flex-col items-center justify-start ">
@@ -102,7 +102,7 @@ const HomeLeft = () => {
         </div>
 
         <h1 className="mb-10 text-white font-semibold font-custom_poppins  text-[25px] uppercase">
-          {auth.currentUser.displayName} {mern2306.value}
+          {auth.currentUser.displayName}
         </h1>
         <div className="flex flex-col justify-center items-center gap-y-12">
           <NavLink to="/">

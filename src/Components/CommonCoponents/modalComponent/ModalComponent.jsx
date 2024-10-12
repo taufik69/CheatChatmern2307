@@ -9,12 +9,13 @@ const customStyles = {
     bottom: "auto",
     marginRight: "-50%",
     transform: "translate(-50%, -50%)",
+    zIndex: 4000,
   },
 };
 
 const ModalComponent = ({ openModal, closeModal, modalIsOpen, children }) => {
   return (
-    <div>
+    <div className="cameraModal">
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={closeModal}
