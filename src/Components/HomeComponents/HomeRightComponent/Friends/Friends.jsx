@@ -31,7 +31,10 @@ const Friends = ({ isChatC = false }) => {
     onValue(FreindsDbRef, (snapshot) => {
       let FreindsBlankArr = [];
       snapshot.forEach((item) => {
-        if (auth.currentUser.uid === item.val().whoRecivedFriendRequestUid) {
+        if (
+          auth.currentUser.uid === item.val().whoRecivedFriendRequestUid ||
+          auth.currentUser.uid === item.val().whoSendFriendRequestUid
+        ) {
           FreindsBlankArr.push({
             ...item.val(),
             FriendKey: item.key,
@@ -71,7 +74,29 @@ const Friends = ({ isChatC = false }) => {
 
   // handleFriend funtion
   const handleFriend = (item = {}) => {
-    dispatch(Friensinfo(item));
+    console.log(auth.currentUser.uid === item.whoRecivedFriendRequestUid);
+
+    if (auth.currentUser.uid === item.whoRecivedFriendRequestUid) {
+      dispatch(
+        Friensinfo({
+          id: item.whoSendFriendRequestUid,
+          name: item.whoSendFriendRequestName,
+          email: item.whoSendFriendRequestEmail,
+          profile_picture: item.whoSendFriendRequestProfilePicture,
+        })
+      );
+      console.log("from if block");
+    } else {
+      console.log("from else block");
+      dispatch(
+        Friensinfo({
+          id: item.whoRecivedFriendRequestUid,
+          name: item.whoRecivedFriendRequestName,
+          email: item.whoRecivedFriendRequestEmail,
+          profile_picture: item.whoRecivedFriendRequestProfile_picture,
+        })
+      );
+    }
   };
   return (
     <div

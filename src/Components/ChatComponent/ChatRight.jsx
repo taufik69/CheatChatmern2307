@@ -9,12 +9,23 @@ import { useSelector } from "react-redux";
 import { getDatabase, push, ref, set } from "firebase/database";
 import { GetTimeNow } from "../../../Utils/Moment/Moment";
 import ModalComponent from "../CommonCoponents/modalComponent/ModalComponent.jsx";
-
+import { ErrorToast } from "../../../Utils/Toast.js";
+import {
+  getStorage,
+  ref as uploaImagedRef,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import { log } from "react-modal/lib/helpers/ariaAppHider.js";
 const ChatRight = () => {
+  const db = getDatabase();
+  const storage = getStorage();
   const [showEmojiPicker, setshowEmojiPicker] = useState(false);
   const [modalIsOpen, setIsOpen] = useState(false);
   const [inputValue, setinputValue] = useState("");
-  const db = getDatabase();
+  const [image, setimage] = useState(null);
+  const [progess, setprogress] = useState(null);
+  const [downloadURL, setdownloadUrl] = useState("");
 
   function openModal() {
     setIsOpen(true);
@@ -54,6 +65,49 @@ const ChatRight = () => {
         });
     }
   };
+
+  /**
+   * handleuploadImage funtion
+   * @params({})
+   */
+
+  const handleuploadImage = (event) => {
+    setimage(event.target.files[0]);
+  };
+
+  const handleSentImage = (event) => {
+    if (!image) {
+      ErrorToast("Image Must Required !!", "top-center");
+    }
+    let typeArr = ["image/png", "image/gif", "image/jpeg", "image/webp"];
+
+    // Check if the image type is valid
+    if (!typeArr.includes(image.type)) {
+      ErrorToast("Image Format can be image/* !!", "top-center");
+    }
+
+    const storageRef = uploaImagedRef(storage, "images/" + image.name);
+    const uploadTask = uploadBytesResumable(storageRef, image);
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setprogress(Math.ceil(progress));
+      },
+      (error) => {
+        console.error("Error from upload image", error);
+      },
+      () => {
+        closeModal();
+        setprogress(null);
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          setdownloadUrl(downloadURL);
+        });
+      }
+    );
+  };
+  console.log(downloadURL);
 
   return (
     <>
@@ -165,19 +219,20 @@ const ChatRight = () => {
       </div>
       <div>
         <ModalComponent
+          ischatPage={true}
           openModal={openModal}
           closeModal={closeModal}
           modalIsOpen={modalIsOpen}
         >
-          <div className="z-50">
-            <div class="flex items-center justify-center w-full ">
+          <div className="">
+            <div className="flex items-center justify-center w-full">
               <label
-                for="dropzone-file"
-                class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50  dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+                htmlFor="dropzone-file"
+                className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
               >
-                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <svg
-                    class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
+                    className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -185,25 +240,49 @@ const ChatRight = () => {
                   >
                     <path
                       stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
                     />
                   </svg>
-                  <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                    <span class="font-semibold">Click to upload</span> or drag
-                    and drop
+                  <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="font-semibold">Click to upload</span> or
+                    drag and drop
                   </p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     SVG, PNG, JPG or GIF (MAX. 800x400px)
                   </p>
                 </div>
-                <input id="dropzone-file" type="file" class="hidden" />
+                <input
+                  id="dropzone-file"
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleuploadImage}
+                />
               </label>
             </div>
 
-            <button> Send </button>
+            {progess ? (
+              <div class="w-full bg-gray-200 rounded  my-5">
+                <div class="w-full bg-gray-200 rounded-full ">
+                  <div
+                    class="mt-4 w-full  bg-blue-500 text-white rounded px-4 py-2 font-medium   text-center   "
+                    style={{ width: `${progess}%` }}
+                  >
+                    {progess}%
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <button
+                className="mt-4 w-full  bg-blue-500 text-white rounded px-4 py-2"
+                onClick={handleSentImage}
+              >
+                Send
+              </button>
+            )}
           </div>
         </ModalComponent>
       </div>

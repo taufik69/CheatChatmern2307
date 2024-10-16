@@ -7,13 +7,28 @@ const customStyles = {
     left: "50%",
     right: "auto",
     bottom: "auto",
+    width: "60%",
     marginRight: "-50%",
     transform: "translate(-50%, -50%)",
+  },
+  overlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 255, 255, 0.75)",
     zIndex: 4000,
   },
 };
 
-const ModalComponent = ({ openModal, closeModal, modalIsOpen, children }) => {
+const ModalComponent = ({
+  openModal,
+  closeModal,
+  modalIsOpen,
+  children,
+  ischatPage = false,
+}) => {
   return (
     <div className="cameraModal">
       <Modal
@@ -24,7 +39,11 @@ const ModalComponent = ({ openModal, closeModal, modalIsOpen, children }) => {
       >
         <button
           onClick={closeModal}
-          className="w-16 h-16 rounded-full bg-red-600 text-white text-3xl flex justify-center items-center"
+          className={
+            ischatPage
+              ? "w-16 h-16 rounded-full bg-red-600 text-white text-3xl flex justify-center items-center mb-10 "
+              : "w-16 h-16 rounded-full bg-red-600 text-white text-3xl flex justify-center items-center"
+          }
         >
           x
         </button>
