@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import avatar from "../../assets/chat/avatar.png";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { IoIosSend } from "react-icons/io";
@@ -6,7 +6,8 @@ import { CiFaceSmile } from "react-icons/ci";
 import { FaCameraRetro } from "react-icons/fa";
 import EmojiPicker from "emoji-picker-react";
 import { useSelector } from "react-redux";
-import { getDatabase, push, ref, set } from "firebase/database";
+import { getDatabase, push, ref, set, onValue } from "firebase/database";
+
 import { GetTimeNow } from "../../../Utils/Moment/Moment";
 import ModalComponent from "../CommonCoponents/modalComponent/ModalComponent.jsx";
 import { ErrorToast } from "../../../Utils/Toast.js";
@@ -16,16 +17,38 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
-import { log } from "react-modal/lib/helpers/ariaAppHider.js";
+import { getAuth } from "firebase/auth";
+import moment from "moment";
 const ChatRight = () => {
   const db = getDatabase();
   const storage = getStorage();
+  const auth = getAuth();
   const [showEmojiPicker, setshowEmojiPicker] = useState(false);
   const [modalIsOpen, setIsOpen] = useState(false);
   const [inputValue, setinputValue] = useState("");
   const [image, setimage] = useState(null);
   const [progess, setprogress] = useState(null);
   const [downloadURL, setdownloadUrl] = useState("");
+  const [allMsg, setallMsg] = useState([]);
+
+  useEffect(() => {
+    const fetcher = () => {
+      const starCountRef = ref(db, "singleMsg");
+      onValue(starCountRef, (snapshot) => {
+        let msgBlankArr = [];
+        snapshot.forEach((item) => {
+          if (
+            auth.currentUser.uid === item.val().whoSendMsgUId ||
+            auth.currentUser.uid === item.val().whoRecivedMsgUid
+          ) {
+            msgBlankArr.push({ ...item.val(), msgKey: item.key });
+          }
+        });
+        setallMsg(msgBlankArr);
+      });
+    };
+    fetcher();
+  }, []);
 
   function openModal() {
     setIsOpen(true);
@@ -50,8 +73,17 @@ const ChatRight = () => {
 
   const handlemessageSend = () => {
     if (inputValue) {
-      set(push(ref(db, "singleMsg/")), {
+      set(push(ref(db, "singleMsg")), {
+        whoSendMsgUId: auth.currentUser.uid,
+        whoSendMsgName: auth.currentUser.displayName,
+        whoSendMsgMail: auth.currentUser.email,
+        WhoSendMsgProfilePicture: auth.currentUser.photoURL || "",
+        whoRecivedMsgUid: friendsItem.id,
+        whoRecivedMsgName: friendsItem.name,
+        whoRecivedMsgProfilePicture: friendsItem.profile_picture || "",
+        whoRecivedMsgEmail: friendsItem.email,
         msg: inputValue,
+        image: downloadURL ? downloadURL : "",
         createdAt: GetTimeNow(),
       })
         .then(() => {
@@ -62,6 +94,29 @@ const ChatRight = () => {
         })
         .finally(() => {
           setinputValue("");
+        });
+    } else {
+      set(push(ref(db, "singleMsg")), {
+        whoSendMsgUId: auth.currentUser.uid,
+        whoSendMsgName: auth.currentUser.displayName,
+        whoSendMsgMail: auth.currentUser.email,
+        WhoSendMsgProfilePicture: auth.currentUser.photoURL || "",
+        whoRecivedMsgUid: friendsItem.id,
+        whoRecivedMsgName: friendsItem.name,
+        whoRecivedMsgProfilePicture: friendsItem.profile_picture || "",
+        whoRecivedMsgEmail: friendsItem.email,
+        msg: inputValue || "",
+        image: downloadURL ? downloadURL : "",
+        createdAt: GetTimeNow(),
+      })
+        .then(() => {
+          console.log("message sent");
+        })
+        .catch((err) => {
+          console.error(err);
+        })
+        .finally(() => {
+          setdownloadUrl("");
         });
     }
   };
@@ -104,23 +159,22 @@ const ChatRight = () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           setdownloadUrl(downloadURL);
         });
+      },
+      () => {
+        handlemessageSend();
       }
     );
   };
-  console.log(downloadURL);
 
   return (
     <>
       <div className="flex justify-between items-center border-b-2 border-b-gray-600 pb-5">
         <div className="flex items-center gap-x-[33px]">
           <picture>
-            <img
-              src={friendsItem.whoSendFriendRequestProfilePicture || avatar}
-              alt={avatar}
-            />
+            <img src={friendsItem.profile_picture || avatar} alt={avatar} />
           </picture>
           <div className="flex flex-col capitalize text-2xl">
-            <h3>{friendsItem.whoSendFriendRequestName || "Swathi"} </h3>
+            <h3>{friendsItem.name || "Swathi"} </h3>
             <p>Online</p>
           </div>
         </div>
@@ -130,52 +184,50 @@ const ChatRight = () => {
         </span>
       </div>
       {/* chat page  */}
-      <div className="h-[70vh] bg-gray-200 overflow-y-scroll p-5 ">
+      <div className="h-[70vh] chatboxImag overflow-y-scroll p-5 ">
         <div className="flex flex-col gap-y-8">
-          <div className="w-[30%] self-start">
-            <div className="box_left  w-full  bg-blue-500 py-5 text-center rounded-xl">
-              <h3 className="text-white font-custom_poppins font-semibold break-words p-2 text-justify flex justify-center ">
-                Hey There !
-              </h3>
-            </div>
-            <p>Today, 2:01pm</p>
-          </div>
-
-          <div className="w-[30%] self-end">
-            <div className="box_Right  w-full  bg-blue-500 py-5 text-center rounded-xl">
-              <h3 className="text-white font-custom_poppins font-semibold break-words p-2 text-justify flex justify-center ">
-                Hey There !
-              </h3>
-            </div>
-            <p>Today, 2:01pm</p>
-          </div>
-
-          <div className="w-[30%] self-end">
-            <div className="box_Right  w-full  bg-blue-500 py-5 text-center rounded-xl">
-              <h3 className="text-white font-custom_poppins font-semibold break-words p-2 text-justify flex justify-center ">
-                Hey There !
-              </h3>
-            </div>
-            <p>Today, 2:01pm</p>
-          </div>
-
-          <div className="w-[30%] self-start">
-            <div className="box_left  w-full  bg-blue-500 py-5 text-center rounded-xl">
-              <h3 className="text-white font-custom_poppins font-semibold break-words p-2 text-justify flex justify-center ">
-                Hey There !
-              </h3>
-            </div>
-            <p>Today, 2:01pm</p>
-          </div>
-
-          <div className="w-[30%] self-start">
-            <div className="box_left  w-full  bg-blue-500 py-5 text-center rounded-xl">
-              <h3 className="text-white font-custom_poppins font-semibold break-words p-2 text-justify flex justify-center ">
-                Hey There !
-              </h3>
-            </div>
-            <p>Today, 2:01pm</p>
-          </div>
+          {allMsg?.map((msg) =>
+            auth.currentUser.uid == msg.whoSendMsgUId &&
+            friendsItem.id === msg.whoRecivedMsgUid ? (
+              msg.image ? (
+                <div className="w-[30%] self-end">
+                  <div className=" w-full text-center rounded-xl ">
+                    <img
+                      src={msg.image}
+                      alt={msg.image}
+                      className="rounded-xl"
+                    />
+                  </div>
+                  <p>{moment(msg.createdAt).fromNow()}</p>
+                </div>
+              ) : (
+                <div className="w-[30%] self-end">
+                  <div className="box_Right  w-full  bg-blue-500 py-5 text-center rounded-xl">
+                    <h3 className="text-white font-custom_poppins font-semibold break-words p-2 text-justify flex justify-center ">
+                      {msg.msg}
+                    </h3>
+                  </div>
+                  <p>{moment(msg.createdAt).fromNow()}</p>
+                </div>
+              )
+            ) : msg.image ? (
+              <div className="w-[30%] self-start">
+                <div className=" w-full   text-center rounded-xl">
+                  <img src={msg.image} alt={msg.image} />
+                </div>
+                <p>{moment(msg.createdAt).fromNow()}</p>
+              </div>
+            ) : (
+              <div className="w-[30%] self-start">
+                <div className="box_left  w-full  bg-blue-500 py-5 text-center rounded-xl">
+                  <h3 className="text-white font-custom_poppins font-semibold break-words p-2 text-justify flex justify-center ">
+                    {msg.msg}
+                  </h3>
+                </div>
+                <p>{moment(msg.createdAt).fromNow()}</p>
+              </div>
+            )
+          )}
         </div>
       </div>
       {/* chat page  */}

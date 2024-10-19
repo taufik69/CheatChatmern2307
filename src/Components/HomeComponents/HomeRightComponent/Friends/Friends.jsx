@@ -74,8 +74,6 @@ const Friends = ({ isChatC = false }) => {
 
   // handleFriend funtion
   const handleFriend = (item = {}) => {
-    console.log(auth.currentUser.uid === item.whoRecivedFriendRequestUid);
-
     if (auth.currentUser.uid === item.whoRecivedFriendRequestUid) {
       dispatch(
         Friensinfo({
@@ -85,9 +83,7 @@ const Friends = ({ isChatC = false }) => {
           profile_picture: item.whoSendFriendRequestProfilePicture,
         })
       );
-      console.log("from if block");
     } else {
-      console.log("from else block");
       dispatch(
         Friensinfo({
           id: item.whoRecivedFriendRequestUid,
@@ -147,9 +143,9 @@ const Friends = ({ isChatC = false }) => {
 
             <div className="flex flex-col items-center justify-center text-wrap w-[50%]  text-justify">
               <h3 className="capitalize text-lg font-semibold font-custom_poppins text-textPrimaryColor">
-                {item.whoSendFriendRequestName
-                  ? item.whoSendFriendRequestName
-                  : "MERN 2307"}
+                {item.whoSendFriendRequestUid === auth.currentUser.uid
+                  ? item.whoRecivedFriendRequestName
+                  : item.whoSendFriendRequestName}
               </h3>
               <p className="opacity-55 text-md font-noraml font-custom_poppins text-textPrimaryColor">
                 {moment(item.createdAt).fromNow()}

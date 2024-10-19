@@ -130,4 +130,9 @@
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
     z-index: -1;
   }
+
+  .chatboxImag {
+    background-image: url("../src/assets/RegistraionAssets/registration.gif");
+    background-attachment: fixed;
+  }
 }
