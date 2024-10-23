@@ -30,6 +30,7 @@ const ChatRight = () => {
   const [progess, setprogress] = useState(null);
   const [downloadURL, setdownloadUrl] = useState("");
   const [allMsg, setallMsg] = useState([]);
+  const [sendAutomatic, setsendAutomatic] = useState(false);
 
   useEffect(() => {
     const fetcher = () => {
@@ -72,7 +73,7 @@ const ChatRight = () => {
   const { friendsItem } = useSelector((state) => state.friendStore);
 
   const handlemessageSend = () => {
-    if (inputValue) {
+    if (inputValue?.length > 0) {
       set(push(ref(db, "singleMsg")), {
         whoSendMsgUId: auth.currentUser.uid,
         whoSendMsgName: auth.currentUser.displayName,
@@ -95,7 +96,8 @@ const ChatRight = () => {
         .finally(() => {
           setinputValue("");
         });
-    } else {
+    } else if (image || downloadURL) {
+      console.log("from else if");
       set(push(ref(db, "singleMsg")), {
         whoSendMsgUId: auth.currentUser.uid,
         whoSendMsgName: auth.currentUser.displayName,
@@ -110,14 +112,19 @@ const ChatRight = () => {
         createdAt: GetTimeNow(),
       })
         .then(() => {
-          console.log("message sent");
+          console.log("image  sent");
         })
         .catch((err) => {
           console.error(err);
         })
         .finally(() => {
           setdownloadUrl("");
+          setimage(null);
         });
+    } else {
+      console.log("from else ");
+
+      return null;
     }
   };
 
@@ -154,17 +161,27 @@ const ChatRight = () => {
         console.error("Error from upload image", error);
       },
       () => {
-        closeModal();
         setprogress(null);
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           setdownloadUrl(downloadURL);
+          setsendAutomatic(true);
         });
-      },
-      () => {
-        handlemessageSend();
+        closeModal();
       }
     );
   };
+
+  // handlemessageSend function
+  useEffect(() => {
+    const caller = () => {
+  
+      handlemessageSend();
+    };
+
+    if ((!downloadURL && !image) || sendAutomatic) {
+      caller();
+    }
+  }, [sendAutomatic]);
 
   return (
     <>
